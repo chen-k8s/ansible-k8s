@@ -1,0 +1,35 @@
+- name: Add Kubernetes yum repository (Aliyun mirror)
+  yum_repository:
+    name: kubernetes
+    description: Kubernetes
+    baseurl: "https://mirrors.aliyun.com/kubernetes-new/core/stable/v{{ kubernetes_version }}/rpm/"
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: "https://mirrors.aliyun.com/kubernetes-new/core/stable/v{{ kubernetes_version }}/rpm/repodata/repomd.xml.key"
+  when: ansible_os_family == "RedHat"
+
+- name: Install kubelet, kubeadm, kubectl (latest in version series)
+  yum:
+    name:
+      - "kubelet-{{ kubernetes_version }}*"
+      - "kubeadm-{{ kubernetes_version }}*"
+      - "kubectl-{{ kubernetes_version }}*"
+    state: latest
+    update_cache: yes
+  when: ansible_os_family == "RedHat"
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: yes
+ 
+- name: Enable kubelet service
+  systemd:
+    name: kubelet
+    enabled: yes
+ 
+# 由于缺少 kubelet 配置文件，首次启动会失败，此行为符合预期
+- name: Attempt to start kubelet (expected to fail before kubeadm init)
+  systemd:
+    name: kubelet
+    state: started
+  failed_when: false

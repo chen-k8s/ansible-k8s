@@ -1,0 +1,37 @@
+- name: 验证集群状态
+  hosts: master[0]
+  tasks:
+    - name: 等待所有节点就绪
+      shell: |
+        # 检查是否有节点的状态不是 "Ready"
+        if kubectl get nodes --no-headers | grep -qv "Ready"; then
+          exit 1
+        else
+          exit 0
+        fi
+      register: node_check
+      until: node_check.rc == 0
+      retries: 30
+      delay: 10
+
+    - name: 显示节点列表
+      command: kubectl get nodes -o wide
+      register: node_list
+
+    - name: 显示系统 Pod 状态
+      command: kubectl get pods -A
+      register: pod_list
+
+    - name: 打印节点信息
+      debug:
+        msg:
+          - "节点列表输出："
+          - "{{ node_list.stdout_lines }}"
+      when: node_list is defined
+
+    - name: 打印 Pod 信息（可选）
+      debug:
+        msg:
+          - "集群 Pod 列表："
+          - "{{ pod_list.stdout_lines }}"
+      when: pod_list is defined

@@ -1,0 +1,285 @@
+# 服务管理
+- name: Stop and disable firewalld
+  ansible.builtin.systemd: name=firewalld state=stopped enabled=no
+
+- name: Stop and disable dnsmasq
+  ansible.builtin.systemd:
+    name: dnsmasq
+    state: stopped
+    enabled: no
+  ignore_errors: yes  #不存在这个服务时，会出错，跳过
+
+#SELinux（立即生效，持久化）
+- name: Disable SELinux immediately
+  ansible.builtin.command: setenforce 0
+  changed_when: true
+  ignore_errors: yes
+
+- name: Disable SELinux permanently
+  ansible.builtin.selinux: state=disabled
+
+- name: Disable SELinux in /etc/sysconfig/selinux
+  ansible.builtin.replace:
+    path: /etc/sysconfig/selinux
+    regexp: '^SELINUX=enforcing'
+    replace: 'SELINUX=disabled'
+  ignore_errors: yes
+
+#Swap（关闭、持久化，swappiness）
+- name: Disable swap immediately
+  ansible.builtin.command: swapoff -a
+  changed_when: true
+  ignore_errors: yes
+
+- name: Comment out swap entries in fstab
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '^([^#].*swap)'
+    replace: '#\1'
+    backup: yes
+
+- name: Set vm.swappiness to 0
+  ansible.builtin.sysctl:
+    name: vm.swappiness
+    value: '0'
+    state: present
+    reload: yes
+
+#配置host解析
+- name: Configure /etc/hosts
+  ansible.builtin.blockinfile:
+    path: /etc/hosts
+    block: |
+      10.0.1.31 k8s-master01
+      10.0.1.32 k8s-master02
+      10.0.1.33 k8s-master03
+      10.0.1.41 k8s-node01
+      10.0.1.42 k8s-node02
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    backup: yes
+
+# 配置yum源：在目标主机上查找所有.repo文件
+- name: Find all repo files on target host
+  find:
+    paths: /etc/yum.repos.d
+    patterns: "*.repo"
+  register: repo_files
+
+# 配置yum源：注释mirrorlist
+- name: Comment out mirrorlist in repo files
+  ansible.builtin.replace:
+    path: "{{ item.path }}"
+    regexp: '^mirrorlist='
+    replace: '#mirrorlist='
+    backup: yes
+  loop: "{{ repo_files.files }}"
+
+# 配置yum源：替换为阿里云baseurl（针对 Rocky Linux）
+- name: Replace baseurl with Aliyun mirror
+  ansible.builtin.replace:
+    path: "{{ item.path }}"
+    regexp: '^#baseurl=http://dl\.rockylinux\.org/\$contentdir'
+    replace: 'baseurl=https://mirrors.aliyun.com/rockylinux'
+    backup: yes
+  loop: "{{ repo_files.files }}"
+  when: ansible_distribution == 'Rocky'
+
+#更新缓存
+- name: Update yum cache
+  ansible.builtin.command: yum makecache
+  changed_when: true
+
+- name: Ensure rsyslog is installed
+  ansible.builtin.package:
+    name: rsyslog
+    state: present
+
+- name: Enable and start rsyslog
+  ansible.builtin.systemd:
+    name: rsyslog
+    state: started
+    enabled: yes
+
+#安装基础软件包
+- name: Install epel-release repository
+  ansible.builtin.dnf:
+    name: epel-release
+    state: present
+
+- name: Install base packages
+  ansible.builtin.dnf:
+    name:
+    - git
+    - vim
+    - wget
+    - jq
+    - psmisc
+    - net-tools
+    - telnet
+    - device-mapper-persistent-data
+    - lvm2
+    - yum-utils
+    - ntpsec
+    - ipvsadm
+    - ipset
+    - sysstat
+    - conntrack
+    - libseccomp
+    state: present
+    enablerepo: epel
+    update_cache: yes
+
+#系统升级
+- name: Upgrade all packages
+  ansible.builtin.dnf:
+    name: '*'
+    state: latest
+    update_cache: yes
+
+#时区与时间同步
+- name: Set timezone to Shanghai
+  ansible.builtin.file:
+    src: /usr/share/zoneinfo/Asia/Shanghai
+    dest: /etc/localtime
+    state: link
+    force: yes
+
+- name: Set timezone file
+  ansible.builtin.copy:
+    content: "Asia/Shanghai\n"
+    dest: /etc/timezone
+    mode: '0644'
+
+- name: Sync time with ntpdate
+  ansible.builtin.command: /usr/sbin/ntpdate time2.aliyun.com
+  changed_when: true
+
+- name: Add ntpdate to crontab
+  ansible.builtin.cron:
+    name: "sync time with aliyun ntp"
+    minute: "*/5"
+    job: "/usr/sbin/ntpdate time2.aliyun.com"
+
+#配置系统资源限制
+- name: Configure system limits
+  ansible.builtin.blockinfile:
+    path: /etc/security/limits.conf
+    block: |
+      * soft nofile 65536
+      * hard nofile 131072
+      * soft nproc 65535
+      * hard nproc 655350
+      * soft memlock unlimited
+      * hard memlock unlimited
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    backup: yes
+
+#加载k8s网络相关内核模块
+- name: Load overlay and br_netfilter modules
+  ansible.builtin.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - overlay
+    - br_netfilter
+
+- name: Load ipvs kernel modules
+  ansible.builtin.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - ip_vs
+    - ip_vs_rr
+    - ip_vs_wrr
+    - ip_vs_sh
+    - nf_conntrack
+
+#配置开机自动加载的模块（ipvs.conf）
+- name: Create ipvs modules load config
+  ansible.builtin.copy:
+    dest: /etc/modules-load.d/ipvs.conf
+    content: |
+      ip_vs
+      ip_vs_lc
+      ip_vs_wlc
+      ip_vs_rr
+      ip_vs_wrr
+      ip_vs_lblc
+      ip_vs_lblcr
+      ip_vs_dh
+      ip_vs_sh
+      ip_vs_fo
+      ip_vs_nq
+      ip_vs_sed
+      ip_vs_ftp
+      ip_vs_sh
+      nf_conntrack
+      ip_tables
+      ip_set
+      xt_set
+      ipt_set
+      ipt_rpfilter
+      ipt_REJECT
+      ipip
+    mode: '0644'
+
+- name: Enable systemd-modules-load service
+  ansible.builtin.systemd:
+    name: systemd-modules-load
+    state: started
+    enabled: yes
+  ignore_errors: yes
+
+#为 Calico CNI 预留数据目录（清理时会被删除，需在部署时重建）
+- name: Create /var/lib/calico directory for Calico CNI
+  ansible.builtin.file:
+    path: /var/lib/calico
+    state: directory
+    mode: '0755'
+
+#内核优化配置（k8s.conf）
+- name: Configure sysctl for Kubernetes
+  ansible.builtin.copy:
+    dest: /etc/sysctl.d/k8s.conf
+    content: |
+      #网络转发
+      net.ipv4.ip_forward = 1
+      net.bridge.bridge-nf-call-iptables = 1
+      net.bridge.bridge-nf-call-ip6tables = 1
+      fs.may_detach_mounts = 1
+      net.ipv4.conf.all.route_localnet = 1
+      #内存管理
+      vm.overcommit_memory = 1
+      vm.panic_on_oom = 0
+      #文件描述符、inotify
+      fs.inotify.max_user_watches = 89100  #值偏低，建议改为524288
+      fs.file-max = 52706963
+      fs.nr_open = 52706963
+      #连接追踪
+      net.netfilter.nf_conntrack_max = 2310720
+      #tcp保活与孤儿连接回收
+      net.ipv4.tcp_keepalive_time = 600
+      net.ipv4.tcp_keepalive_probes = 3
+      net.ipv4.tcp_keepalive_intvl = 15
+      net.ipv4.tcp_max_orphans = 327680
+      net.ipv4.tcp_orphan_retries = 3
+      #高并发与syn flood防护
+      net.ipv4.tcp_max_tw_buckets = 36000
+      net.ipv4.tcp_tw_reuse = 1
+      net.ipv4.tcp_syncookies = 1
+      net.ipv4.tcp_max_syn_backlog = 16384
+      net.ipv4.tcp_timestamps = 0
+      net.core.somaxconn = 16384
+    mode: '0644'
+
+- name: Apply sysctl configuration
+  ansible.builtin.command: sysctl --system
+  changed_when: true
+
+#master01节点克隆源码
+- name: Clone k8s-ha-install repository on master01
+  ansible.builtin.git:
+    repo: https://gitee.com/dukuan/k8s-ha-install.git
+    dest: /root/k8s-ha-install
+  when: inventory_hostname == (groups['master'] | first)
+

@@ -1,0 +1,41 @@
+---
+- name: 配置 SSH 免密登录（lookup 方式）
+  hosts: k8s_cluster
+  gather_facts: no
+  vars:
+    # 指定控制节点上要分发的公钥路径（修改为你实际的路径）
+    local_public_key_path: "{{ lookup('env', 'HOME') }}/.ssh/id_rsa.pub"
+    ansible_ssh_pass: '456321'
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+  tasks:
+    # 1. 确保控制节点存在 SSH 密钥对（如果不存在则生成）
+    - name: 生成本地密钥对（若不存在）
+      delegate_to: localhost
+      run_once: yes
+      ansible.builtin.command: >
+        ssh-keygen -t rsa -b 4096 -f {{ local_public_key_path | regex_replace('\\.pub$', '') }} -N "" -C "ansible-generated"
+      args:
+        creates: "{{ local_public_key_path }}"
+
+    # 2. 读取本地公钥内容（直接返回原始文本，无需解码）
+    - name: 读取控制节点公钥内容
+      delegate_to: localhost
+      run_once: yes
+      ansible.builtin.set_fact:
+        public_key_content: "{{ lookup('file', local_public_key_path) }}"
+
+    # 3. 确保远程主机 .ssh 目录存在
+    - name: 确保远程 .ssh 目录存在
+      ansible.builtin.file:
+        path: "~/.ssh"
+        state: directory
+        mode: '0700'
+
+    # 4. 将公钥写入远程 authorized_keys
+    - name: 添加公钥到远程 authorized_keys
+      ansible.builtin.lineinfile:
+        path: "~/.ssh/authorized_keys"
+        line: "{{ public_key_content }}"
+        create: yes
+        mode: '0600'
+        backup: yes

@@ -1,0 +1,51 @@
+==============================================================
+              Kubernetes 集群部署报告
+==============================================================
+  部署开始: 2026-06-23 23:55:34
+  报告生成: 2026-06-24 00:02:23
+  日志文件: /root/ansible-k8s-bak/logs/deploy_20260623_235534.log
+
+  [基本信息]
+    Kubernetes 版本: v1.31.14
+    部署模式: 3 Master + 2 Worker (高可用)
+    容器运行时: containerd (v2.2.1)
+    CNI 插件: Calico (3.28.1)
+    控制平面端点: 10.0.1.199:16443
+
+  [部署阶段]
+    ✓ 阶段1: 环境准备
+    ✓ 阶段2: 软件安装
+    ✓ 阶段3: 集群初始化
+    ✓ 阶段4: 集群验证
+
+  [验证结果]
+    节点状态验证 [✓ PASS]
+        ✓ 节点 k8s-master01: 状态=Ready, 角色=control-plane, 版本=v1.31.14
+        ✓ 节点 k8s-master02: 状态=Ready, 角色=control-plane, 版本=v1.31.14
+        ✓ 节点 k8s-master03: 状态=Ready, 角色=control-plane, 版本=v1.31.14
+        ✓ 节点 k8s-node01: 状态=Ready, 角色=<none>, 版本=v1.31.14
+        ✓ 节点 k8s-node02: 状态=Ready, 角色=<none>, 版本=v1.31.14
+    控制平面组件验证 [✓ PASS]
+        ✓ kube-apiserver: Running (3/3)
+        ✓ kube-controller-manager: Running (3/3)
+        ✓ kube-scheduler: Running (3/3)
+        ✓ etcd: Running (3/3)
+        ✓ coredns: Running (2/2)
+        ✓ kube-proxy: Running (5/5)
+          Pod 状态分布: Running: 27
+    集群健康状态验证 [✓ PASS]
+        ✓ 集群信息: 可正常获取
+        ✓ API Server 健康检查: 健康 (ok)
+    网络插件验证 [✓ PASS]
+        ✓ Calico-node: Running (5/5)
+        ✓ Calico-kube-controllers: Running (1/1)
+          Calico-typha (可选): 未部署
+    证书与安全验证 [✓ PASS]
+        ✓ CA 证书: 有效，剩余 3649 天
+        ✓ API Server 证书: 有效，剩余 364 天
+        ✓ API Server Kubelet 客户端证书: 有效，剩余 364 天
+        ✓ Front Proxy CA 证书: 有效，剩余 3649 天
+
+--------------------------------------------------------------
+  总体状态: ✓ 部署成功
+==============================================================

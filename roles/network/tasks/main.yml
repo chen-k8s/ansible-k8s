@@ -1,0 +1,63 @@
+---
+# roles/calico/tasks/main.yml
+
+# ==========================================
+# 所有节点：配置 NetworkManager 忽略 Calico 接口
+# ==========================================
+- name: Configure NetworkManager to ignore Calico interfaces
+  copy:
+    dest: /etc/NetworkManager/conf.d/calico.conf
+    content: |
+      [keyfile]
+      unmanaged-devices=interface-name:cali*;interface-name:tunl*;interface-name:vxlan.calico;interface-name:vxlan-v6.calico;interface-name:wireguard.cali;interface-name:wg-v6.cali
+    mode: '0644'
+  notify: Restart NetworkManager
+
+# ==========================================
+# 以下任务仅在 Master01 执行（使用 run_once + delegate_to）
+# ==========================================
+- name: Ensure k8s-ha-install repo is at correct branch
+  git:
+    repo: "{{ k8s_ha_install_repo_url }}"
+    dest: /root/k8s-ha-install
+    version: "manual-installation-v{{ kubernetes_version }}.x"
+    force: yes
+  run_once: true
+  delegate_to: "{{ groups['master'][0] }}"
+
+- name: Get Pod CIDR from kube-controller-manager manifest
+  shell: |
+    grep cluster-cidr /etc/kubernetes/manifests/kube-controller-manager.yaml | \
+    awk -F= '{print $NF}'
+  register: pod_subnet
+  run_once: true
+  delegate_to: "{{ groups['master'][0] }}"
+  changed_when: false
+
+- name: Replace POD_CIDR placeholder in calico.yaml
+  replace:
+    path: /root/k8s-ha-install/calico/calico.yaml
+    regexp: 'POD_CIDR'
+    replace: '{{ pod_subnet.stdout }}'
+  run_once: true
+  delegate_to: "{{ groups['master'][0] }}"
+
+- name: Apply Calico manifests
+  command: kubectl apply -f /root/k8s-ha-install/calico/calico.yaml
+  run_once: true
+  delegate_to: "{{ groups['master'][0] }}"
+
+# ==========================================
+# 验证状态（只读，不标记 changed）
+# ==========================================
+- name: Verify Calico pods status
+  command: kubectl get pods -n kube-system -l k8s-app=calico-node
+  run_once: true
+  delegate_to: "{{ groups['master'][0] }}"
+  changed_when: false
+
+- name: Verify nodes status
+  command: kubectl get nodes
+  run_once: true
+  delegate_to: "{{ groups['master'][0] }}"
+  changed_when: false

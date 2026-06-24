@@ -1,0 +1,72 @@
+---
+# roles/metrics-server/tasks/main.yml
+
+# ==========================================
+# 1. 从 Master01 读取 front-proxy-ca.crt
+# ==========================================
+- name: Read front-proxy-ca.crt from master01
+  slurp:
+    src: /etc/kubernetes/pki/front-proxy-ca.crt
+  register: front_proxy_ca
+  run_once: true
+  delegate_to: "{{ groups['master'][0] }}"
+  changed_when: false
+
+# ==========================================
+# 2. 确保 Node 节点 PKI 目录存在
+# ==========================================
+- name: Ensure Kubernetes PKI directory exists on nodes
+  file:
+    path: /etc/kubernetes/pki
+    state: directory
+    mode: '0755'
+  when: inventory_hostname in groups['worker']
+
+# ==========================================
+# 3. 分发证书到所有 Worker 节点
+# ==========================================
+- name: Copy certificate to workers
+  copy:
+    dest: /etc/kubernetes/pki/front-proxy-ca.crt
+    content: "{{ front_proxy_ca.content | b64decode }}"
+    owner: root
+    group: root
+    mode: '0644'
+  when: inventory_hostname in groups['worker']
+
+# ==========================================
+# 4. 以下操作仅在 Master01 执行：安装 Metrics Server
+# ==========================================
+- name: Apply metrics server manifests
+  command: kubectl apply -f /root/k8s-ha-install/kubeadm-metrics-server/comp.yaml
+  run_once: true
+  delegate_to: "{{ groups['master'][0] }}"
+
+# ==========================================
+# 5. 强制重启 Pod 使新证书生效
+#    （kubectl apply 不会触发已部署的 Pod 重启）
+# ==========================================
+- name: Force restart metrics-server pods
+  command: kubectl rollout restart deployment metrics-server -n kube-system
+  run_once: true
+  delegate_to: "{{ groups['master'][0] }}"
+
+# ==========================================
+# 6. 验证证书是否已正确分发到 Worker
+# ==========================================
+- name: Verify front-proxy-ca.crt exists on worker
+  stat:
+    path: /etc/kubernetes/pki/front-proxy-ca.crt
+  register: cert_check
+  when: "'worker' in group_names"
+
+- name: Show cert status on workers
+  debug:
+    msg: >-
+      Worker {{ inventory_hostname }}:
+      front-proxy-ca.crt
+      {{ 'OK (regular file)' if cert_check.stat.exists and cert_check.stat.isreg
+         else 'EXISTS (directory!)' if cert_check.stat.exists and cert_check.stat.isdir
+         else 'MISSING' }}
+      (size: {{ cert_check.stat.size | default(0) }} bytes)
+  when: "'worker' in group_names"

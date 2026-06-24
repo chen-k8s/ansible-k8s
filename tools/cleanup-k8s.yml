@@ -1,0 +1,170 @@
+---
+- name: 全面清理 Kubernetes 集群残留数据
+  hosts: k8s_cluster
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    # ========================================
+    # 1. 先停止所有 K8s 相关服务（避免清理冲突）
+    # ========================================
+    - name: Stop kubelet service
+      systemd:
+        name: kubelet
+        state: stopped
+        enabled: no
+        daemon_reload: yes
+      ignore_errors: yes
+
+    - name: Stop keepalived service
+      systemd:
+        name: keepalived
+        state: stopped
+        enabled: no
+      ignore_errors: yes
+
+    - name: Stop haproxy service
+      systemd:
+        name: haproxy
+        state: stopped
+        enabled: no
+      ignore_errors: yes
+
+    # ========================================
+    # 2. 重置 kubeadm（移除集群配置、停止静态 Pod）
+    # ========================================
+    - name: Reset kubeadm
+      command: kubeadm reset -f
+      register: reset_result
+      changed_when: reset_result.rc == 0
+      failed_when: false
+      ignore_errors: yes
+
+    # ========================================
+    # 3. 清理 iptables/ipvs 规则
+    #    K8s 和 Calico 会在 filter/nat 表上写大量规则，
+    #    残留规则会干扰新集群的网络插件。
+    #    （注：flush 不影响已建立的 SSH 连接）
+    # ========================================
+    - name: Flush iptables filter and nat rules
+      shell: |
+        iptables -F
+        iptables -t nat -F
+        iptables -X
+        ip6tables -F
+        ip6tables -t nat -F
+        ip6tables -X
+      ignore_errors: yes
+
+    - name: Clear ipvs rules
+      shell: ipvsadm -C 2>/dev/null || true
+      ignore_errors: yes
+
+    # ========================================
+    # 4. 删除虚拟网络接口（避免新集群接口名冲突）
+    # ========================================
+    - name: Delete virtual network interfaces
+      shell: |
+        for iface in $(ip link show | grep -oP '^\d+: \K(cali|tunl|vxlan\.cali|kube-ipvs|cni|flannel|docker)\S*'); do
+          ip link delete "$iface" 2>/dev/null || true
+        done
+        ip link delete cni0 2>/dev/null || true
+        ip link delete flannel.1 2>/dev/null || true
+        ip link delete docker0 2>/dev/null || true
+      ignore_errors: yes
+
+    # ========================================
+    # 5. 删除所有 K8s 相关数据目录
+    # ========================================
+    - name: Remove Kubernetes data directories
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/kubernetes
+        - /var/lib/kubelet
+        - /var/lib/etcd
+        - /var/lib/cni
+        - /etc/cni/net.d
+        - /opt/cni/bin
+        - /var/lib/calico
+        - /root/.kube
+        - /var/log/pods
+        - /var/log/containers
+      ignore_errors: yes
+
+    # ========================================
+    # 6. 清理 containerd 残留
+    #    旧 pause 镜像版本可能和新集群不匹配
+    # ========================================
+    - name: Remove containerd container/sandbox data
+      shell: |
+        crictl rm --all 2>/dev/null || true
+        crictl rmi --prune 2>/dev/null || true
+      ignore_errors: yes
+
+    - name: Remove containerd state directory
+      file:
+        path: /var/lib/containerd
+        state: absent
+      ignore_errors: yes
+
+    - name: Restart containerd from clean state
+      systemd:
+        name: containerd
+        state: restarted
+        enabled: yes
+        daemon_reload: yes
+      ignore_errors: yes
+
+    # ========================================
+    # 7. 清理网络管理残留
+    #    NetworkManager 可能记住了 Calico 接口
+    # ========================================
+    - name: Remove Calico NetworkManager config
+      file:
+        path: /etc/NetworkManager/conf.d/calico.conf
+        state: absent
+      ignore_errors: yes
+
+    - name: Restart NetworkManager
+      systemd:
+        name: NetworkManager
+        state: restarted
+      ignore_errors: yes
+
+    # ========================================
+    # 8. 清理 HAProxy + Keepalived 配置
+    # ========================================
+    - name: Remove HAProxy and Keepalived configs
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/haproxy/haproxy.cfg
+        - /etc/keepalived/keepalived.conf
+        - /etc/keepalived/check_apiserver.sh
+      ignore_errors: yes
+
+    # ========================================
+    # 9. 清理 k8s-ha-install 仓库（重新部署时会重新克隆）
+    # ========================================
+    - name: Remove cloned k8s-ha-install repo
+      file:
+        path: /root/k8s-ha-install
+        state: absent
+      ignore_errors: yes
+
+    # ========================================
+    # 10. 再次确认 /etc/kubernetes 目录已清空
+    #     （如果 kubeadm reset 未完全清理）
+    # ========================================
+    - name: Final verification - ensure /etc/kubernetes is gone
+      file:
+        path: /etc/kubernetes
+        state: absent
+      ignore_errors: yes
+
+    - name: Print cleanup summary
+      debug:
+        msg: "节点 {{ inventory_hostname }} 清理完毕"

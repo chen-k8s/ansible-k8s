@@ -1,0 +1,40 @@
+#k8s集群全局变量
+deploy_metrics: true
+
+#版本配置
+kubernetes_version: '1.31'
+containerd_version: 'v2.2.1'
+calico_version: '3.28.1'
+
+#网络配置
+pod_network_cidr: '10.3.0.0/16'
+service_cidr: '10.4.0.0/16'
+cluster_dns: '10.4.0.10'
+
+#节点信息
+master_group: 'test'
+k8s_master01: '10.0.1.31'
+k8s_master02: '10.0.1.32'
+k8s_master03: '10.0.1.33'
+k8s_node01: '10.0.1.41'
+k8s_node02: '10.0.1.42'
+
+
+#高可用配置
+control_plane_vip: '10.0.1.199'
+vip_interface: 'ens160'
+haproxy_port: 16443
+apiserver_port: 6443
+control_plane_endpoint: '10.0.1.199:16443'
+
+#runtime配置
+container_runtime: 'containerd'
+cgroup_driver: 'systemd'
+
+#kubelet配置
+kubelet_extra_args: "--node-ip={{ ansible_default_ipv4.address }}"
+
+#镜像仓库配置
+image_repository: "https://mirrors.aliyun.com/rockylinux"
+k8s_image_repository: "registry.cn-hangzhou.aliyuncs.com/google_containers"
+k8s_ha_install_repo_url: "https://gitee.com/dukuan/k8s-ha-install.git"

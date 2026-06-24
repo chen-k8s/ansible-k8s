@@ -1,0 +1,16 @@
+#重启
+- name: Reboot all nodes to apply kernel changes
+  ansible.builtin.reboot:
+    reboot_timeout: 300
+  when: inventory_hostname in groups['all']
+
+# 验证模块加载
+- name: Verify ipvs modules loaded after reboot
+  ansible.builtin.command: lsmod
+  register: lsmod_result
+  changed_when: false
+
+- name: Check ip_vs in lsmod output
+  ansible.builtin.debug:
+    msg: "ip_vs module loaded"
+  when: "'ip_vs' in lsmod_result.stdout"

@@ -1,0 +1,170 @@
+{
+  "deploy_time": "2026-06-23 23:55:34",
+  "report_time": "2026-06-24 00:02:23",
+  "k8s_version": "v1.31.14",
+  "overall_status": "PASS",
+  "playbook_results": [
+    {
+      "name": "阶段1: 环境准备",
+      "success": true
+    },
+    {
+      "name": "阶段2: 软件安装",
+      "success": true
+    },
+    {
+      "name": "阶段3: 集群初始化",
+      "success": true
+    },
+    {
+      "name": "阶段4: 集群验证",
+      "success": true
+    }
+  ],
+  "verification": {
+    "results": {
+      "verify_nodes_details": {
+        "category": "节点状态验证",
+        "status": "PASS",
+        "items": [
+          {
+            "check": "节点 k8s-master01",
+            "status": "PASS",
+            "detail": "状态=Ready, 角色=control-plane, 版本=v1.31.14"
+          },
+          {
+            "check": "节点 k8s-master02",
+            "status": "PASS",
+            "detail": "状态=Ready, 角色=control-plane, 版本=v1.31.14"
+          },
+          {
+            "check": "节点 k8s-master03",
+            "status": "PASS",
+            "detail": "状态=Ready, 角色=control-plane, 版本=v1.31.14"
+          },
+          {
+            "check": "节点 k8s-node01",
+            "status": "PASS",
+            "detail": "状态=Ready, 角色=<none>, 版本=v1.31.14"
+          },
+          {
+            "check": "节点 k8s-node02",
+            "status": "PASS",
+            "detail": "状态=Ready, 角色=<none>, 版本=v1.31.14"
+          }
+        ],
+        "warnings": [],
+        "summary": "Master: 3, Worker: 2, 总计: 5"
+      },
+      "verify_control_plane": {
+        "category": "控制平面组件验证",
+        "status": "PASS",
+        "items": [
+          {
+            "check": "kube-apiserver",
+            "status": "PASS",
+            "detail": "Running (3/3)"
+          },
+          {
+            "check": "kube-controller-manager",
+            "status": "PASS",
+            "detail": "Running (3/3)"
+          },
+          {
+            "check": "kube-scheduler",
+            "status": "PASS",
+            "detail": "Running (3/3)"
+          },
+          {
+            "check": "etcd",
+            "status": "PASS",
+            "detail": "Running (3/3)"
+          },
+          {
+            "check": "coredns",
+            "status": "PASS",
+            "detail": "Running (2/2)"
+          },
+          {
+            "check": "kube-proxy",
+            "status": "PASS",
+            "detail": "Running (5/5)"
+          },
+          {
+            "check": "Pod 状态分布",
+            "status": "INFO",
+            "detail": "Running: 27"
+          }
+        ],
+        "warnings": []
+      },
+      "verify_cluster_health": {
+        "category": "集群健康状态验证",
+        "status": "PASS",
+        "items": [
+          {
+            "check": "集群信息",
+            "status": "PASS",
+            "detail": "可正常获取"
+          },
+          {
+            "check": "API Server 健康检查",
+            "status": "PASS",
+            "detail": "健康 (ok)"
+          }
+        ],
+        "warnings": []
+      },
+      "verify_network_plugin": {
+        "category": "网络插件验证",
+        "status": "PASS",
+        "items": [
+          {
+            "check": "Calico-node",
+            "status": "PASS",
+            "detail": "Running (5/5)"
+          },
+          {
+            "check": "Calico-kube-controllers",
+            "status": "PASS",
+            "detail": "Running (1/1)"
+          },
+          {
+            "check": "Calico-typha (可选)",
+            "status": "INFO",
+            "detail": "未部署"
+          }
+        ],
+        "warnings": []
+      },
+      "verify_certificates": {
+        "category": "证书与安全验证",
+        "status": "PASS",
+        "items": [
+          {
+            "check": "CA 证书",
+            "status": "PASS",
+            "detail": "有效，剩余 3649 天"
+          },
+          {
+            "check": "API Server 证书",
+            "status": "PASS",
+            "detail": "有效，剩余 364 天"
+          },
+          {
+            "check": "API Server Kubelet 客户端证书",
+            "status": "PASS",
+            "detail": "有效，剩余 364 天"
+          },
+          {
+            "check": "Front Proxy CA 证书",
+            "status": "PASS",
+            "detail": "有效，剩余 3649 天"
+          }
+        ],
+        "warnings": []
+      }
+    },
+    "overall_status": "PASS"
+  }
+}

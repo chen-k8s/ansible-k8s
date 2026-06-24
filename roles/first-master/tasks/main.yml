@@ -1,0 +1,80 @@
+---
+# ============================================
+# 动态获取已安装的 kubeadm 精确版本
+# ============================================
+- name: 获取已安装的 kubeadm 版本
+  shell: kubeadm version -o short
+  register: kubeadm_version_output
+  changed_when: false
+
+- name: 设置 k8s_version 变量
+  set_fact:
+    k8s_version: "{{ kubeadm_version_output.stdout }}"
+
+# ============================================
+# 仅在第一个 Master 生成并转换 kubeadm 配置
+# ============================================
+- name: 生成 kubeadm 初始配置文件
+  template:
+    src: kubeadm-config.yaml.j2
+    dest: /root/kubeadm-config.yaml
+  when: inventory_hostname == groups['master'][0]
+
+- name: 转换 kubeadm 配置文件格式
+  command: kubeadm config migrate --old-config /root/kubeadm-config.yaml --new-config /root/new.yaml
+  when: inventory_hostname == groups['master'][0]
+
+# ============================================
+# 分发 new.yaml 到所有 Master 节点
+# ============================================
+- name: 取回转换后的配置文件到控制节点
+  fetch:
+    src: /root/new.yaml
+    dest: "/tmp/{{ master_group }}-new.yaml"
+    flat: yes
+  when: inventory_hostname == groups['master'][0]
+
+- name: 分发 new.yaml 到所有 Master 节点
+  copy:
+    src: "/tmp/{{ master_group }}-new.yaml"
+    dest: /root/new.yaml
+  when: inventory_hostname in groups['master']
+
+# ============================================
+# 所有 Master 提前拉取镜像
+# ============================================
+- name: 所有 Master 节点提前拉取 Kubernetes 镜像
+  command: kubeadm config images pull --config /root/new.yaml
+  when: inventory_hostname in groups['master']
+
+# ============================================
+# Master01 初始化集群
+# ============================================
+- name: Master01 初始化 Kubernetes 集群
+  command: kubeadm init --config /root/new.yaml --upload-certs
+  register: kubeadm_init_output
+  when: inventory_hostname == groups['master'][0]
+
+# ============================================
+# Master01 配置 kubectl 环境
+# ============================================
+- name: 配置 Master01 kubectl 访问环境
+  shell: |
+    mkdir -p /root/.kube
+    cp -f /etc/kubernetes/admin.conf /root/.kube/config
+    chown $(id -u):$(id -g) /root/.kube/config
+  when: inventory_hostname == groups['master'][0]
+
+# ============================================
+# 显式生成新的 join token
+# ============================================
+- name: 生成新的 kubeadm join token
+  command: kubeadm token create
+  register: token_output
+  when: inventory_hostname == groups['master'][0]
+
+- name: 设置 join_token 变量
+  set_fact:
+    join_token: "{{ token_output.stdout }}"
+  when: inventory_hostname == groups['master'][0]
+

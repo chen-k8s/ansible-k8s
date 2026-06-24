@@ -1,0 +1,15 @@
+---
+- name: 初始化第一个 Master 节点
+  hosts: master[0]
+  roles:
+    - first-master
+
+- name: 其余 Master 和 Worker 节点加入集群
+  hosts: k8s_cluster
+  roles:
+    - cluster-join
+
+- name: 部署 CNI 网络插件（在第一个 Master 上执行）
+  hosts: master[0]
+  roles:
+    - network

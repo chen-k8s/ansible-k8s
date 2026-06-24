@@ -1,0 +1,7 @@
+---
+- name: 环境准备 - 所有节点
+  hosts: k8s_cluster
+  gather_facts: yes
+  roles:
+    - common
+    - reboot

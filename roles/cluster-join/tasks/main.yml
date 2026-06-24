@@ -1,0 +1,65 @@
+# ============================================
+# 获取其他节点加入所需的凭证
+# ============================================
+- name: 获取 discovery-token-ca-cert-hash
+  shell: |
+    openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | \
+    openssl rsa -pubin -outform der 2>/dev/null | \
+    openssl dgst -sha256 -hex | sed 's/^.* //'
+  register: discovery_hash
+  run_once: true
+  delegate_to: "{{ groups['master'][0] }}"
+
+- name: 获取 certificate-key
+  shell: kubeadm init phase upload-certs --upload-certs 2>/dev/null | tail -1
+  register: cert_key
+  run_once: true
+  delegate_to: "{{ groups['master'][0] }}"
+
+- name: 从第一个 master 获取 join token（假设 init role 已生成并保存）
+  set_fact:
+    join_token: "{{ hostvars[groups['master'][0]]['join_token'] }}"
+  when: join_token is not defined
+  run_once: true
+  ignore_errors: yes  #若hostvars中没有该变量，忽略错误继续
+
+# 如果 join_token 未定义，可以动态生成一个（备用方案）
+- name: 动态生成 join token（如果未定义）
+  command: kubeadm token create --print-join-command
+  register: join_command
+  when: join_token is not defined
+  run_once: true
+  delegate_to: "{{ groups['master'][0] }}"
+
+- name: 从生成的 join 命令中提取 token
+  set_fact:
+    join_token: "{{ join_command.stdout.split('--token ')[1].split()[0] }}"
+  when:
+    - join_token is not defined 
+    - join_command is defined
+    - join_command.stdout is defined
+  run_once: true
+
+# ============================================
+# 其他 Master 节点加入控制平面
+# ============================================
+- name: 其他 Master 节点加入控制平面
+  command: >
+    kubeadm join {{ control_plane_endpoint }}
+    --token {{ hostvars[groups['master'][0]]['join_token'] }}
+    --discovery-token-ca-cert-hash sha256:{{ hostvars[groups['master'][0]]['discovery_hash']['stdout'] }}
+    --control-plane
+    --certificate-key {{ hostvars[groups['master'][0]]['cert_key']['stdout'] }}
+  when:
+    - inventory_hostname in groups['master']
+    - inventory_hostname != groups['master'][0]
+
+# ============================================
+# Worker 节点加入集群
+# ============================================
+- name: Worker 节点加入集群
+  command: >
+    kubeadm join {{ control_plane_endpoint }}
+    --token {{ hostvars[groups['master'][0]]['join_token'] }}
+    --discovery-token-ca-cert-hash sha256:{{ hostvars[groups['master'][0]]['discovery_hash']['stdout'] }}
+  when: inventory_hostname in groups.get('worker', [])

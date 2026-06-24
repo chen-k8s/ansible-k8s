@@ -1,0 +1,889 @@
+[2026-06-23 23:55:34] INFO: ==========================================
+[2026-06-23 23:55:34] INFO:   Kubernetes 集群部署开始
+[2026-06-23 23:55:34] INFO:   时间: 2026-06-23 23:55:34
+[2026-06-23 23:55:34] INFO:   日志: /root/ansible-k8s-bak/logs/deploy_20260623_235534.log
+[2026-06-23 23:55:34] INFO: ==========================================
+[2026-06-23 23:55:34] INFO: === 检查环境依赖 ===
+[2026-06-23 23:55:34] INFO: 测试 SSH 连通性...
+[2026-06-23 23:55:34] INFO: 执行: SSH 连接测试
+k8s_master03 | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+k8s_master02 | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+k8s_node01 | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+k8s_node02 | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+k8s_master01 | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+[2026-06-23 23:55:35] INFO: === 阶段1: 环境准备 ===
+[2026-06-23 23:55:35] INFO: 执行: 阶段1: 环境准备
+
+PLAY [环境准备 - 所有节点] *****************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [k8s_master02]
+ok: [k8s_node02]
+ok: [k8s_node01]
+ok: [k8s_master01]
+ok: [k8s_master03]
+
+TASK [common : Stop and disable firewalld] *************************************
+ok: [k8s_master03]
+ok: [k8s_node01]
+ok: [k8s_master01]
+ok: [k8s_master02]
+ok: [k8s_node02]
+
+TASK [common : Stop and disable dnsmasq] ***************************************
+fatal: [k8s_master01]: FAILED! => {"changed": false, "msg": "Could not find the requested service dnsmasq: host"}
+...ignoring
+fatal: [k8s_master02]: FAILED! => {"changed": false, "msg": "Could not find the requested service dnsmasq: host"}
+...ignoring
+fatal: [k8s_master03]: FAILED! => {"changed": false, "msg": "Could not find the requested service dnsmasq: host"}
+...ignoring
+fatal: [k8s_node01]: FAILED! => {"changed": false, "msg": "Could not find the requested service dnsmasq: host"}
+...ignoring
+fatal: [k8s_node02]: FAILED! => {"changed": false, "msg": "Could not find the requested service dnsmasq: host"}
+...ignoring
+
+TASK [common : Disable SELinux immediately] ************************************
+fatal: [k8s_node01]: FAILED! => {"changed": true, "cmd": ["setenforce", "0"], "delta": "0:00:00.015282", "end": "2026-06-23 23:55:40.539912", "msg": "non-zero return code", "rc": 1, "start": "2026-06-23 23:55:40.524630", "stderr": "setenforce: SELinux is disabled", "stderr_lines": ["setenforce: SELinux is disabled"], "stdout": "", "stdout_lines": []}
+...ignoring
+fatal: [k8s_node02]: FAILED! => {"changed": true, "cmd": ["setenforce", "0"], "delta": "0:00:00.022319", "end": "2026-06-23 23:55:40.539440", "msg": "non-zero return code", "rc": 1, "start": "2026-06-23 23:55:40.517121", "stderr": "setenforce: SELinux is disabled", "stderr_lines": ["setenforce: SELinux is disabled"], "stdout": "", "stdout_lines": []}
+...ignoring
+fatal: [k8s_master03]: FAILED! => {"changed": true, "cmd": ["setenforce", "0"], "delta": "0:00:00.008502", "end": "2026-06-23 23:55:40.542080", "msg": "non-zero return code", "rc": 1, "start": "2026-06-23 23:55:40.533578", "stderr": "setenforce: SELinux is disabled", "stderr_lines": ["setenforce: SELinux is disabled"], "stdout": "", "stdout_lines": []}
+...ignoring
+fatal: [k8s_master02]: FAILED! => {"changed": true, "cmd": ["setenforce", "0"], "delta": "0:00:00.007128", "end": "2026-06-23 23:55:40.552437", "msg": "non-zero return code", "rc": 1, "start": "2026-06-23 23:55:40.545309", "stderr": "setenforce: SELinux is disabled", "stderr_lines": ["setenforce: SELinux is disabled"], "stdout": "", "stdout_lines": []}
+...ignoring
+fatal: [k8s_master01]: FAILED! => {"changed": true, "cmd": ["setenforce", "0"], "delta": "0:00:00.009064", "end": "2026-06-23 23:55:40.560331", "msg": "non-zero return code", "rc": 1, "start": "2026-06-23 23:55:40.551267", "stderr": "setenforce: SELinux is disabled", "stderr_lines": ["setenforce: SELinux is disabled"], "stdout": "", "stdout_lines": []}
+...ignoring
+
+TASK [common : Disable SELinux permanently] ************************************
+ok: [k8s_node01]
+ok: [k8s_master03]
+ok: [k8s_master01]
+ok: [k8s_master02]
+ok: [k8s_node02]
+
+TASK [common : Disable SELinux in /etc/sysconfig/selinux] **********************
+ok: [k8s_master02]
+ok: [k8s_node02]
+ok: [k8s_master03]
+ok: [k8s_master01]
+ok: [k8s_node01]
+
+TASK [common : Disable swap immediately] ***************************************
+changed: [k8s_master01]
+changed: [k8s_master02]
+changed: [k8s_master03]
+changed: [k8s_node01]
+changed: [k8s_node02]
+
+TASK [common : Comment out swap entries in fstab] ******************************
+ok: [k8s_master01]
+ok: [k8s_master02]
+ok: [k8s_master03]
+ok: [k8s_node01]
+ok: [k8s_node02]
+
+TASK [common : Set vm.swappiness to 0] *****************************************
+ok: [k8s_master03]
+ok: [k8s_master01]
+ok: [k8s_node01]
+ok: [k8s_master02]
+ok: [k8s_node02]
+
+TASK [common : Configure /etc/hosts] *******************************************
+ok: [k8s_master01]
+ok: [k8s_node01]
+ok: [k8s_master03]
+ok: [k8s_master02]
+ok: [k8s_node02]
+
+TASK [common : Find all repo files on target host] *****************************
+ok: [k8s_master02]
+ok: [k8s_node02]
+ok: [k8s_master01]
+ok: [k8s_master03]
+ok: [k8s_node01]
+
+TASK [common : Comment out mirrorlist in repo files] ***************************
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/rocky-addons.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 6628, 'inode': 264996, 'dev': 64768, 'nlink': 1, 'atime': 1782216403.2979822, 'mtime': 1782216400.8969824, 'ctime': 1782216400.8979824, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/rocky-addons.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 6628, 'inode': 180297, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.9759824, 'mtime': 1782216400.5979824, 'ctime': 1782216400.5979824, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/rocky-addons.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 6628, 'inode': 176586, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.9049826, 'mtime': 1782216400.5749826, 'ctime': 1782216400.5759826, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/rocky-addons.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 6628, 'inode': 177867, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.7659826, 'mtime': 1782216400.4289827, 'ctime': 1782216400.4299827, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/rocky-addons.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 6628, 'inode': 234211, 'dev': 64768, 'nlink': 1, 'atime': 1782216403.7399933, 'mtime': 1782216401.4229934, 'ctime': 1782216401.4239933, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/rocky-devel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1168, 'inode': 67691865, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.9089825, 'mtime': 1782216400.9789827, 'ctime': 1782216400.9799826, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/rocky-devel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1168, 'inode': 67240794, 'dev': 64768, 'nlink': 1, 'atime': 1782216403.302982, 'mtime': 1782216401.2989824, 'ctime': 1782216401.2999823, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/rocky-devel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1168, 'inode': 67690647, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.9819822, 'mtime': 1782216400.9869823, 'ctime': 1782216400.9889824, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/rocky-devel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1168, 'inode': 67688984, 'dev': 64768, 'nlink': 1, 'atime': 1782216403.7459934, 'mtime': 1782216401.8039935, 'ctime': 1782216401.8059933, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/rocky-devel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1168, 'inode': 67691478, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.7709825, 'mtime': 1782216400.8249826, 'ctime': 1782216400.8249826, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/rocky-extras.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2393, 'inode': 176588, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.9099824, 'mtime': 1782216401.3769825, 'ctime': 1782216401.3789825, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/rocky-extras.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2393, 'inode': 264998, 'dev': 64768, 'nlink': 1, 'atime': 1782216403.3039823, 'mtime': 1782216401.6909823, 'ctime': 1782216401.6919823, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/rocky-extras.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2393, 'inode': 180299, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.9829824, 'mtime': 1782216401.3819823, 'ctime': 1782216401.3819823, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/rocky-extras.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2393, 'inode': 177869, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.7729826, 'mtime': 1782216401.2309828, 'ctime': 1782216401.2319827, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/rocky-extras.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2393, 'inode': 234213, 'dev': 64768, 'nlink': 1, 'atime': 1782216403.7469933, 'mtime': 1782216402.2249935, 'ctime': 1782216402.2259934, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/rocky.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 3426, 'inode': 67691863, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.8999825, 'mtime': 1782216401.7799826, 'ctime': 1782216401.7809825, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/rocky.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 3426, 'inode': 67690642, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.9729824, 'mtime': 1782216401.7969823, 'ctime': 1782216401.7979825, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/rocky.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 3426, 'inode': 67240792, 'dev': 64768, 'nlink': 1, 'atime': 1782216403.2959821, 'mtime': 1782216402.0739822, 'ctime': 1782216402.0749822, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/rocky.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 3426, 'inode': 67691475, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.7619827, 'mtime': 1782216401.6339827, 'ctime': 1782216401.6339827, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/rocky.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 3426, 'inode': 67688982, 'dev': 64768, 'nlink': 1, 'atime': 1782216403.7349932, 'mtime': 1782216402.6299934, 'ctime': 1782216402.6319933, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/epel-cisco-openh264.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1052, 'inode': 176583, 'dev': 64768, 'nlink': 1, 'atime': 1782216420.8919814, 'mtime': 1745342281.0, 'ctime': 1782216419.1089816, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/epel-cisco-openh264.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1052, 'inode': 180294, 'dev': 64768, 'nlink': 1, 'atime': 1782216420.9339814, 'mtime': 1745342281.0, 'ctime': 1782216419.1759815, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/epel-cisco-openh264.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1052, 'inode': 177864, 'dev': 64768, 'nlink': 1, 'atime': 1782216420.7579815, 'mtime': 1745342281.0, 'ctime': 1782216418.9569817, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/epel-cisco-openh264.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1052, 'inode': 234207, 'dev': 64768, 'nlink': 1, 'atime': 1782216421.7629924, 'mtime': 1745342281.0, 'ctime': 1782216419.9329925, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/epel-cisco-openh264.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1052, 'inode': 264992, 'dev': 64768, 'nlink': 1, 'atime': 1782216421.2489812, 'mtime': 1745342281.0, 'ctime': 1782216419.5109813, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/epel-testing.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1432, 'inode': 176592, 'dev': 64768, 'nlink': 1, 'atime': 1782216420.8939815, 'mtime': 1745342281.0, 'ctime': 1782216419.1089816, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/epel-testing.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1432, 'inode': 180303, 'dev': 64768, 'nlink': 1, 'atime': 1782216420.9349813, 'mtime': 1745342281.0, 'ctime': 1782216419.1759815, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/epel-testing.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1432, 'inode': 177873, 'dev': 64768, 'nlink': 1, 'atime': 1782216420.7579815, 'mtime': 1745342281.0, 'ctime': 1782216418.9569817, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/epel-testing.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1432, 'inode': 265002, 'dev': 64768, 'nlink': 1, 'atime': 1782216421.250981, 'mtime': 1745342281.0, 'ctime': 1782216419.5109813, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/epel-testing.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1432, 'inode': 234217, 'dev': 64768, 'nlink': 1, 'atime': 1782216421.7639923, 'mtime': 1745342281.0, 'ctime': 1782216419.9329925, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/epel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1333, 'inode': 180304, 'dev': 64768, 'nlink': 1, 'atime': 1782216420.9319813, 'mtime': 1745342281.0, 'ctime': 1782216419.1759815, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/epel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1333, 'inode': 176593, 'dev': 64768, 'nlink': 1, 'atime': 1782216420.8909814, 'mtime': 1745342281.0, 'ctime': 1782216419.1089816, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/epel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1333, 'inode': 177874, 'dev': 64768, 'nlink': 1, 'atime': 1782216420.7569816, 'mtime': 1745342281.0, 'ctime': 1782216418.9569817, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/epel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1333, 'inode': 265003, 'dev': 64768, 'nlink': 1, 'atime': 1782216421.247981, 'mtime': 1745342281.0, 'ctime': 1782216419.5109813, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/epel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1333, 'inode': 234218, 'dev': 64768, 'nlink': 1, 'atime': 1782216421.7609923, 'mtime': 1745342281.0, 'ctime': 1782216419.9329925, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/rocky-security.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1428, 'inode': 1484, 'dev': 64768, 'nlink': 1, 'atime': 1782218428.026936, 'mtime': 1782218426.318936, 'ctime': 1782218426.318936, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/rocky-security.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1428, 'inode': 3805889, 'dev': 64768, 'nlink': 1, 'atime': 1782218428.098275, 'mtime': 1782218426.434275, 'ctime': 1782218426.434275, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/rocky-security.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1428, 'inode': 33836869, 'dev': 64768, 'nlink': 1, 'atime': 1782218428.092737, 'mtime': 1782218426.454737, 'ctime': 1782218426.454737, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/rocky-security.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1428, 'inode': 798, 'dev': 64768, 'nlink': 1, 'atime': 1782218427.9974182, 'mtime': 1782218426.3524182, 'ctime': 1782218426.3524182, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/rocky-security.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1428, 'inode': 1409, 'dev': 64768, 'nlink': 1, 'atime': 1782218428.0709803, 'mtime': 1782218426.4359803, 'ctime': 1782218426.4359803, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/docker-ce.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2081, 'inode': 56343, 'dev': 64768, 'nlink': 1, 'atime': 1782217175.943709, 'mtime': 1782217174.783709, 'ctime': 1782217174.7857091, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/docker-ce.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2081, 'inode': 56535, 'dev': 64768, 'nlink': 1, 'atime': 1782217175.9170089, 'mtime': 1782217174.774009, 'ctime': 1782217174.777009, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/docker-ce.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2081, 'inode': 57291, 'dev': 64768, 'nlink': 1, 'atime': 1782217175.94201, 'mtime': 1782217174.78401, 'ctime': 1782217174.7880101, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/docker-ce.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2081, 'inode': 57353, 'dev': 64768, 'nlink': 1, 'atime': 1782217175.4899974, 'mtime': 1782217174.3709974, 'ctime': 1782217174.3759973, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/docker-ce.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2081, 'inode': 56407, 'dev': 64768, 'nlink': 1, 'atime': 1782217175.90402, 'mtime': 1782217174.77402, 'ctime': 1782217174.77602, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/kubernetes.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 229, 'inode': 56245, 'dev': 64768, 'nlink': 1, 'atime': 1782217249.0566652, 'mtime': 1782217248.2990444, 'ctime': 1782217248.2990444, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/kubernetes.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 229, 'inode': 56437, 'dev': 64768, 'nlink': 1, 'atime': 1782217249.1210046, 'mtime': 1782217248.3070047, 'ctime': 1782217248.3070047, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/kubernetes.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 229, 'inode': 56245, 'dev': 64768, 'nlink': 1, 'atime': 1782217249.1139379, 'mtime': 1782217248.2643628, 'ctime': 1782217248.2643628, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/kubernetes.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 229, 'inode': 57199, 'dev': 64768, 'nlink': 1, 'atime': 1782217248.648302, 'mtime': 1782217247.9459512, 'ctime': 1782217247.9459512, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/kubernetes.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 229, 'inode': 56172, 'dev': 64768, 'nlink': 1, 'atime': 1782217249.1359367, 'mtime': 1782217248.2953572, 'ctime': 1782217248.2953572, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+
+TASK [common : Replace baseurl with Aliyun mirror] *****************************
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/rocky-addons.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 6628, 'inode': 264996, 'dev': 64768, 'nlink': 1, 'atime': 1782216403.2979822, 'mtime': 1782216400.8969824, 'ctime': 1782216400.8979824, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/rocky-addons.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 6628, 'inode': 180297, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.9759824, 'mtime': 1782216400.5979824, 'ctime': 1782216400.5979824, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/rocky-addons.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 6628, 'inode': 177867, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.7659826, 'mtime': 1782216400.4289827, 'ctime': 1782216400.4299827, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/rocky-addons.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 6628, 'inode': 176586, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.9049826, 'mtime': 1782216400.5749826, 'ctime': 1782216400.5759826, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/rocky-addons.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 6628, 'inode': 234211, 'dev': 64768, 'nlink': 1, 'atime': 1782216403.7399933, 'mtime': 1782216401.4229934, 'ctime': 1782216401.4239933, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/rocky-devel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1168, 'inode': 67690647, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.9819822, 'mtime': 1782216400.9869823, 'ctime': 1782216400.9889824, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/rocky-devel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1168, 'inode': 67240794, 'dev': 64768, 'nlink': 1, 'atime': 1782216403.302982, 'mtime': 1782216401.2989824, 'ctime': 1782216401.2999823, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/rocky-devel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1168, 'inode': 67691478, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.7709825, 'mtime': 1782216400.8249826, 'ctime': 1782216400.8249826, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/rocky-devel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1168, 'inode': 67688984, 'dev': 64768, 'nlink': 1, 'atime': 1782216403.7459934, 'mtime': 1782216401.8039935, 'ctime': 1782216401.8059933, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/rocky-devel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1168, 'inode': 67691865, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.9089825, 'mtime': 1782216400.9789827, 'ctime': 1782216400.9799826, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/rocky-extras.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2393, 'inode': 180299, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.9829824, 'mtime': 1782216401.3819823, 'ctime': 1782216401.3819823, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/rocky-extras.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2393, 'inode': 264998, 'dev': 64768, 'nlink': 1, 'atime': 1782216403.3039823, 'mtime': 1782216401.6909823, 'ctime': 1782216401.6919823, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/rocky-extras.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2393, 'inode': 177869, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.7729826, 'mtime': 1782216401.2309828, 'ctime': 1782216401.2319827, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/rocky-extras.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2393, 'inode': 234213, 'dev': 64768, 'nlink': 1, 'atime': 1782216403.7469933, 'mtime': 1782216402.2249935, 'ctime': 1782216402.2259934, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/rocky-extras.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2393, 'inode': 176588, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.9099824, 'mtime': 1782216401.3769825, 'ctime': 1782216401.3789825, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/rocky.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 3426, 'inode': 67690642, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.9729824, 'mtime': 1782216401.7969823, 'ctime': 1782216401.7979825, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/rocky.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 3426, 'inode': 67240792, 'dev': 64768, 'nlink': 1, 'atime': 1782216403.2959821, 'mtime': 1782216402.0739822, 'ctime': 1782216402.0749822, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/rocky.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 3426, 'inode': 67691475, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.7619827, 'mtime': 1782216401.6339827, 'ctime': 1782216401.6339827, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/rocky.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 3426, 'inode': 67688982, 'dev': 64768, 'nlink': 1, 'atime': 1782216403.7349932, 'mtime': 1782216402.6299934, 'ctime': 1782216402.6319933, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/rocky.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 3426, 'inode': 67691863, 'dev': 64768, 'nlink': 1, 'atime': 1782216402.8999825, 'mtime': 1782216401.7799826, 'ctime': 1782216401.7809825, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/epel-cisco-openh264.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1052, 'inode': 180294, 'dev': 64768, 'nlink': 1, 'atime': 1782216420.9339814, 'mtime': 1745342281.0, 'ctime': 1782216419.1759815, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/epel-cisco-openh264.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1052, 'inode': 264992, 'dev': 64768, 'nlink': 1, 'atime': 1782216421.2489812, 'mtime': 1745342281.0, 'ctime': 1782216419.5109813, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/epel-cisco-openh264.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1052, 'inode': 177864, 'dev': 64768, 'nlink': 1, 'atime': 1782216420.7579815, 'mtime': 1745342281.0, 'ctime': 1782216418.9569817, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/epel-cisco-openh264.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1052, 'inode': 234207, 'dev': 64768, 'nlink': 1, 'atime': 1782216421.7629924, 'mtime': 1745342281.0, 'ctime': 1782216419.9329925, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/epel-cisco-openh264.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1052, 'inode': 176583, 'dev': 64768, 'nlink': 1, 'atime': 1782216420.8919814, 'mtime': 1745342281.0, 'ctime': 1782216419.1089816, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/epel-testing.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1432, 'inode': 180303, 'dev': 64768, 'nlink': 1, 'atime': 1782216420.9349813, 'mtime': 1745342281.0, 'ctime': 1782216419.1759815, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/epel-testing.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1432, 'inode': 265002, 'dev': 64768, 'nlink': 1, 'atime': 1782216421.250981, 'mtime': 1745342281.0, 'ctime': 1782216419.5109813, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/epel-testing.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1432, 'inode': 177873, 'dev': 64768, 'nlink': 1, 'atime': 1782216420.7579815, 'mtime': 1745342281.0, 'ctime': 1782216418.9569817, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/epel-testing.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1432, 'inode': 234217, 'dev': 64768, 'nlink': 1, 'atime': 1782216421.7639923, 'mtime': 1745342281.0, 'ctime': 1782216419.9329925, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/epel-testing.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1432, 'inode': 176592, 'dev': 64768, 'nlink': 1, 'atime': 1782216420.8939815, 'mtime': 1745342281.0, 'ctime': 1782216419.1089816, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/epel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1333, 'inode': 180304, 'dev': 64768, 'nlink': 1, 'atime': 1782216420.9319813, 'mtime': 1745342281.0, 'ctime': 1782216419.1759815, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/epel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1333, 'inode': 177874, 'dev': 64768, 'nlink': 1, 'atime': 1782216420.7569816, 'mtime': 1745342281.0, 'ctime': 1782216418.9569817, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/epel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1333, 'inode': 234218, 'dev': 64768, 'nlink': 1, 'atime': 1782216421.7609923, 'mtime': 1745342281.0, 'ctime': 1782216419.9329925, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/epel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1333, 'inode': 265003, 'dev': 64768, 'nlink': 1, 'atime': 1782216421.247981, 'mtime': 1745342281.0, 'ctime': 1782216419.5109813, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/epel.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1333, 'inode': 176593, 'dev': 64768, 'nlink': 1, 'atime': 1782216420.8909814, 'mtime': 1745342281.0, 'ctime': 1782216419.1089816, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/rocky-security.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1428, 'inode': 1484, 'dev': 64768, 'nlink': 1, 'atime': 1782218428.026936, 'mtime': 1782218426.318936, 'ctime': 1782218426.318936, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/rocky-security.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1428, 'inode': 798, 'dev': 64768, 'nlink': 1, 'atime': 1782218427.9974182, 'mtime': 1782218426.3524182, 'ctime': 1782218426.3524182, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/rocky-security.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1428, 'inode': 33836869, 'dev': 64768, 'nlink': 1, 'atime': 1782218428.092737, 'mtime': 1782218426.454737, 'ctime': 1782218426.454737, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/rocky-security.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1428, 'inode': 1409, 'dev': 64768, 'nlink': 1, 'atime': 1782218428.0709803, 'mtime': 1782218426.4359803, 'ctime': 1782218426.4359803, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/rocky-security.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 1428, 'inode': 3805889, 'dev': 64768, 'nlink': 1, 'atime': 1782218428.098275, 'mtime': 1782218426.434275, 'ctime': 1782218426.434275, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/docker-ce.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2081, 'inode': 56343, 'dev': 64768, 'nlink': 1, 'atime': 1782217175.943709, 'mtime': 1782217174.783709, 'ctime': 1782217174.7857091, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/docker-ce.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2081, 'inode': 57291, 'dev': 64768, 'nlink': 1, 'atime': 1782217175.94201, 'mtime': 1782217174.78401, 'ctime': 1782217174.7880101, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/docker-ce.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2081, 'inode': 56407, 'dev': 64768, 'nlink': 1, 'atime': 1782217175.90402, 'mtime': 1782217174.77402, 'ctime': 1782217174.77602, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/docker-ce.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2081, 'inode': 57353, 'dev': 64768, 'nlink': 1, 'atime': 1782217175.4899974, 'mtime': 1782217174.3709974, 'ctime': 1782217174.3759973, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/docker-ce.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 2081, 'inode': 56535, 'dev': 64768, 'nlink': 1, 'atime': 1782217175.9170089, 'mtime': 1782217174.774009, 'ctime': 1782217174.777009, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master02] => (item={'path': '/etc/yum.repos.d/kubernetes.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 229, 'inode': 56245, 'dev': 64768, 'nlink': 1, 'atime': 1782217249.0566652, 'mtime': 1782217248.2990444, 'ctime': 1782217248.2990444, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node01] => (item={'path': '/etc/yum.repos.d/kubernetes.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 229, 'inode': 56245, 'dev': 64768, 'nlink': 1, 'atime': 1782217249.1139379, 'mtime': 1782217248.2643628, 'ctime': 1782217248.2643628, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_node02] => (item={'path': '/etc/yum.repos.d/kubernetes.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 229, 'inode': 56172, 'dev': 64768, 'nlink': 1, 'atime': 1782217249.1359367, 'mtime': 1782217248.2953572, 'ctime': 1782217248.2953572, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master01] => (item={'path': '/etc/yum.repos.d/kubernetes.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 229, 'inode': 57199, 'dev': 64768, 'nlink': 1, 'atime': 1782217248.648302, 'mtime': 1782217247.9459512, 'ctime': 1782217247.9459512, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+ok: [k8s_master03] => (item={'path': '/etc/yum.repos.d/kubernetes.repo', 'mode': '0644', 'isdir': False, 'ischr': False, 'isblk': False, 'isreg': True, 'isfifo': False, 'islnk': False, 'issock': False, 'uid': 0, 'gid': 0, 'size': 229, 'inode': 56437, 'dev': 64768, 'nlink': 1, 'atime': 1782217249.1210046, 'mtime': 1782217248.3070047, 'ctime': 1782217248.3070047, 'gr_name': 'root', 'pw_name': 'root', 'wusr': True, 'rusr': True, 'xusr': False, 'wgrp': False, 'rgrp': True, 'xgrp': False, 'woth': False, 'roth': True, 'xoth': False, 'isuid': False, 'isgid': False})
+
+TASK [common : Update yum cache] ***********************************************
+changed: [k8s_node01]
+changed: [k8s_master03]
+changed: [k8s_master02]
+changed: [k8s_master01]
+changed: [k8s_node02]
+
+TASK [common : Ensure rsyslog is installed] ************************************
+ok: [k8s_node02]
+ok: [k8s_master01]
+ok: [k8s_master02]
+ok: [k8s_master03]
+ok: [k8s_node01]
+
+TASK [common : Enable and start rsyslog] ***************************************
+ok: [k8s_master01]
+ok: [k8s_master03]
+ok: [k8s_master02]
+ok: [k8s_node01]
+ok: [k8s_node02]
+
+TASK [common : Install epel-release repository] ********************************
+ok: [k8s_master01]
+ok: [k8s_master02]
+ok: [k8s_node01]
+ok: [k8s_master03]
+ok: [k8s_node02]
+
+TASK [common : Install base packages] ******************************************
+ok: [k8s_master01]
+ok: [k8s_node02]
+ok: [k8s_master03]
+ok: [k8s_node01]
+ok: [k8s_master02]
+
+TASK [common : Upgrade all packages] *******************************************
+ok: [k8s_master03]
+ok: [k8s_master01]
+ok: [k8s_node01]
+ok: [k8s_master02]
+ok: [k8s_node02]
+
+TASK [common : Set timezone to Shanghai] ***************************************
+ok: [k8s_master02]
+ok: [k8s_master01]
+ok: [k8s_node01]
+ok: [k8s_node02]
+ok: [k8s_master03]
+
+TASK [common : Set timezone file] **********************************************
+ok: [k8s_master02]
+ok: [k8s_master01]
+ok: [k8s_node01]
+ok: [k8s_node02]
+ok: [k8s_master03]
+
+TASK [common : Sync time with ntpdate] *****************************************
+changed: [k8s_master02]
+changed: [k8s_master01]
+changed: [k8s_master03]
+changed: [k8s_node01]
+changed: [k8s_node02]
+
+TASK [common : Add ntpdate to crontab] *****************************************
+ok: [k8s_master02]
+ok: [k8s_master03]
+ok: [k8s_node01]
+ok: [k8s_master01]
+ok: [k8s_node02]
+
+TASK [common : Configure system limits] ****************************************
+ok: [k8s_master01]
+ok: [k8s_master02]
+ok: [k8s_master03]
+ok: [k8s_node01]
+ok: [k8s_node02]
+
+TASK [common : Load overlay and br_netfilter modules] **************************
+ok: [k8s_master03] => (item=overlay)
+ok: [k8s_master02] => (item=overlay)
+ok: [k8s_master01] => (item=overlay)
+ok: [k8s_node01] => (item=overlay)
+ok: [k8s_node02] => (item=overlay)
+ok: [k8s_master03] => (item=br_netfilter)
+ok: [k8s_master02] => (item=br_netfilter)
+ok: [k8s_node01] => (item=br_netfilter)
+ok: [k8s_master01] => (item=br_netfilter)
+ok: [k8s_node02] => (item=br_netfilter)
+
+TASK [common : Load ipvs kernel modules] ***************************************
+ok: [k8s_master01] => (item=ip_vs)
+ok: [k8s_master02] => (item=ip_vs)
+ok: [k8s_master03] => (item=ip_vs)
+ok: [k8s_node02] => (item=ip_vs)
+ok: [k8s_node01] => (item=ip_vs)
+ok: [k8s_master01] => (item=ip_vs_rr)
+ok: [k8s_master02] => (item=ip_vs_rr)
+ok: [k8s_master03] => (item=ip_vs_rr)
+ok: [k8s_node02] => (item=ip_vs_rr)
+ok: [k8s_node01] => (item=ip_vs_rr)
+ok: [k8s_master01] => (item=ip_vs_wrr)
+ok: [k8s_master02] => (item=ip_vs_wrr)
+ok: [k8s_master03] => (item=ip_vs_wrr)
+ok: [k8s_node02] => (item=ip_vs_wrr)
+ok: [k8s_node01] => (item=ip_vs_wrr)
+ok: [k8s_master01] => (item=ip_vs_sh)
+ok: [k8s_master02] => (item=ip_vs_sh)
+ok: [k8s_master03] => (item=ip_vs_sh)
+ok: [k8s_node02] => (item=ip_vs_sh)
+ok: [k8s_node01] => (item=ip_vs_sh)
+ok: [k8s_master01] => (item=nf_conntrack)
+ok: [k8s_master02] => (item=nf_conntrack)
+ok: [k8s_master03] => (item=nf_conntrack)
+ok: [k8s_node02] => (item=nf_conntrack)
+ok: [k8s_node01] => (item=nf_conntrack)
+
+TASK [common : Create ipvs modules load config] ********************************
+ok: [k8s_master01]
+ok: [k8s_master02]
+ok: [k8s_master03]
+ok: [k8s_node01]
+ok: [k8s_node02]
+
+TASK [common : Enable systemd-modules-load service] ****************************
+ok: [k8s_master01]
+ok: [k8s_master03]
+ok: [k8s_master02]
+ok: [k8s_node01]
+ok: [k8s_node02]
+
+TASK [common : Create /var/lib/calico directory for Calico CNI] ****************
+changed: [k8s_master01]
+changed: [k8s_master02]
+changed: [k8s_master03]
+changed: [k8s_node01]
+changed: [k8s_node02]
+
+TASK [common : Configure sysctl for Kubernetes] ********************************
+ok: [k8s_master02]
+ok: [k8s_master03]
+ok: [k8s_master01]
+ok: [k8s_node01]
+ok: [k8s_node02]
+
+TASK [common : Apply sysctl configuration] *************************************
+changed: [k8s_master01]
+changed: [k8s_master02]
+changed: [k8s_node01]
+changed: [k8s_master03]
+changed: [k8s_node02]
+
+TASK [common : Clone k8s-ha-install repository on master01] ********************
+changed: [k8s_master01]
+
+TASK [reboot : Reboot all nodes to apply kernel changes] ***********************
+changed: [k8s_master03]
+changed: [k8s_node02]
+changed: [k8s_master01]
+changed: [k8s_master02]
+changed: [k8s_node01]
+
+TASK [reboot : Verify ipvs modules loaded after reboot] ************************
+ok: [k8s_master01]
+ok: [k8s_master02]
+ok: [k8s_node01]
+ok: [k8s_master03]
+ok: [k8s_node02]
+
+TASK [reboot : Check ip_vs in lsmod output] ************************************
+ok: [k8s_master01] => {
+    "msg": "ip_vs module loaded"
+}
+ok: [k8s_master02] => {
+    "msg": "ip_vs module loaded"
+}
+ok: [k8s_master03] => {
+    "msg": "ip_vs module loaded"
+}
+ok: [k8s_node01] => {
+    "msg": "ip_vs module loaded"
+}
+ok: [k8s_node02] => {
+    "msg": "ip_vs module loaded"
+}
+
+PLAY RECAP *********************************************************************
+k8s_master01               : ok=35   changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=2   
+k8s_master02               : ok=34   changed=7    unreachable=0    failed=0    skipped=1    rescued=0    ignored=2   
+k8s_master03               : ok=34   changed=7    unreachable=0    failed=0    skipped=1    rescued=0    ignored=2   
+k8s_node01                 : ok=34   changed=7    unreachable=0    failed=0    skipped=1    rescued=0    ignored=2   
+k8s_node02                 : ok=34   changed=7    unreachable=0    failed=0    skipped=1    rescued=0    ignored=2   
+
+[2026-06-23 23:57:29] INFO: 等待节点重启后 SSH 恢复...
+[2026-06-23 23:57:29] INFO: 等待 10.0.1.31 SSH 服务恢复（最长 300 秒）...
+[2026-06-23 23:57:30] INFO: SSH 连接 10.0.1.31 已恢复
+[2026-06-23 23:57:30] INFO: 等待 10.0.1.32 SSH 服务恢复（最长 300 秒）...
+[2026-06-23 23:57:30] INFO: SSH 连接 10.0.1.32 已恢复
+[2026-06-23 23:57:30] INFO: 等待 10.0.1.33 SSH 服务恢复（最长 300 秒）...
+[2026-06-23 23:57:30] INFO: SSH 连接 10.0.1.33 已恢复
+[2026-06-23 23:57:30] INFO: 等待 10.0.1.41 SSH 服务恢复（最长 300 秒）...
+[2026-06-23 23:57:30] INFO: SSH 连接 10.0.1.41 已恢复
+[2026-06-23 23:57:30] INFO: 等待 10.0.1.42 SSH 服务恢复（最长 300 秒）...
+[2026-06-23 23:57:31] INFO: SSH 连接 10.0.1.42 已恢复
+[2026-06-23 23:57:41] INFO: === 阶段2: 软件安装 ===
+[2026-06-23 23:57:41] INFO: 执行: 阶段2: 软件安装
+
+PLAY [安装容器运行时 - 所有节点] ***********************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [k8s_master03]
+ok: [k8s_node02]
+ok: [k8s_master01]
+ok: [k8s_node01]
+ok: [k8s_master02]
+
+TASK [containerd : Add Docker CE yum repository] *******************************
+ok: [k8s_node02]
+ok: [k8s_master03]
+ok: [k8s_master01]
+ok: [k8s_node01]
+ok: [k8s_master02]
+
+TASK [containerd : Install or update docker-ce and containerd] *****************
+ok: [k8s_node02]
+ok: [k8s_master01]
+ok: [k8s_master03]
+ok: [k8s_master02]
+ok: [k8s_node01]
+
+TASK [containerd : Configure containerd kernel modules] ************************
+ok: [k8s_node02]
+ok: [k8s_master02]
+ok: [k8s_master01]
+ok: [k8s_node01]
+ok: [k8s_master03]
+
+TASK [containerd : Load overlay kernel module] *********************************
+changed: [k8s_master01]
+changed: [k8s_master02]
+changed: [k8s_master03]
+changed: [k8s_node01]
+changed: [k8s_node02]
+
+TASK [containerd : Load br_netfilter kernel module] ****************************
+changed: [k8s_master01]
+changed: [k8s_master02]
+changed: [k8s_master03]
+changed: [k8s_node01]
+changed: [k8s_node02]
+
+TASK [containerd : Configure sysctl for Kubernetes CRI] ************************
+ok: [k8s_node01] => (item={'name': 'net.bridge.bridge-nf-call-iptables', 'value': '1'})
+ok: [k8s_master01] => (item={'name': 'net.bridge.bridge-nf-call-iptables', 'value': '1'})
+ok: [k8s_node02] => (item={'name': 'net.bridge.bridge-nf-call-iptables', 'value': '1'})
+ok: [k8s_master02] => (item={'name': 'net.bridge.bridge-nf-call-iptables', 'value': '1'})
+ok: [k8s_master03] => (item={'name': 'net.bridge.bridge-nf-call-iptables', 'value': '1'})
+ok: [k8s_master01] => (item={'name': 'net.ipv4.ip_forward', 'value': '1'})
+ok: [k8s_node01] => (item={'name': 'net.ipv4.ip_forward', 'value': '1'})
+ok: [k8s_master03] => (item={'name': 'net.ipv4.ip_forward', 'value': '1'})
+ok: [k8s_node02] => (item={'name': 'net.ipv4.ip_forward', 'value': '1'})
+ok: [k8s_master02] => (item={'name': 'net.ipv4.ip_forward', 'value': '1'})
+ok: [k8s_master03] => (item={'name': 'net.bridge.bridge-nf-call-ip6tables', 'value': '1'})
+ok: [k8s_node01] => (item={'name': 'net.bridge.bridge-nf-call-ip6tables', 'value': '1'})
+ok: [k8s_master01] => (item={'name': 'net.bridge.bridge-nf-call-ip6tables', 'value': '1'})
+ok: [k8s_master02] => (item={'name': 'net.bridge.bridge-nf-call-ip6tables', 'value': '1'})
+ok: [k8s_node02] => (item={'name': 'net.bridge.bridge-nf-call-ip6tables', 'value': '1'})
+
+TASK [containerd : Create containerd config directory] *************************
+ok: [k8s_master01]
+ok: [k8s_master02]
+ok: [k8s_master03]
+ok: [k8s_node01]
+ok: [k8s_node02]
+
+TASK [containerd : Generate containerd default config] *************************
+ok: [k8s_master01]
+ok: [k8s_master02]
+ok: [k8s_master03]
+ok: [k8s_node02]
+ok: [k8s_node01]
+
+TASK [containerd : Write containerd config file] *******************************
+changed: [k8s_node01]
+changed: [k8s_master02]
+changed: [k8s_master01]
+changed: [k8s_master03]
+changed: [k8s_node02]
+
+TASK [containerd : Ensure pause image is set to Aliyun mirror] *****************
+changed: [k8s_master01]
+changed: [k8s_master03]
+changed: [k8s_node01]
+changed: [k8s_master02]
+changed: [k8s_node02]
+
+TASK [containerd : Enable systemd cgroup driver] *******************************
+changed: [k8s_node01]
+changed: [k8s_node02]
+changed: [k8s_master01]
+changed: [k8s_master03]
+changed: [k8s_master02]
+
+TASK [containerd : Alternative - comment out disabled_plugins line if it contains "cri"] ***
+changed: [k8s_master01]
+changed: [k8s_master02]
+changed: [k8s_master03]
+changed: [k8s_node01]
+changed: [k8s_node02]
+
+TASK [containerd : Start and enable containerd] ********************************
+ok: [k8s_master01]
+ok: [k8s_node02]
+ok: [k8s_master02]
+ok: [k8s_node01]
+ok: [k8s_master03]
+
+TASK [containerd : Configure crictl] *******************************************
+ok: [k8s_master02]
+ok: [k8s_master01]
+ok: [k8s_master03]
+ok: [k8s_node02]
+ok: [k8s_node01]
+
+RUNNING HANDLER [containerd : restart containerd] ******************************
+changed: [k8s_master01]
+changed: [k8s_master02]
+changed: [k8s_node01]
+changed: [k8s_master03]
+changed: [k8s_node02]
+
+PLAY [安装 Kubernetes 组件 - 所有节点] *****************************************
+
+TASK [kubernetes : Add Kubernetes yum repository (Aliyun mirror)] **************
+ok: [k8s_master03]
+ok: [k8s_master01]
+ok: [k8s_master02]
+ok: [k8s_node01]
+ok: [k8s_node02]
+
+TASK [kubernetes : Install kubelet, kubeadm, kubectl (latest in version series)] ***
+ok: [k8s_node02]
+ok: [k8s_master02]
+ok: [k8s_master01]
+ok: [k8s_node01]
+ok: [k8s_master03]
+
+TASK [kubernetes : Reload systemd daemon] **************************************
+ok: [k8s_master01]
+ok: [k8s_master02]
+ok: [k8s_master03]
+ok: [k8s_node01]
+ok: [k8s_node02]
+
+TASK [kubernetes : Enable kubelet service] *************************************
+changed: [k8s_master02]
+changed: [k8s_master03]
+changed: [k8s_master01]
+changed: [k8s_node01]
+changed: [k8s_node02]
+
+TASK [kubernetes : Attempt to start kubelet (expected to fail before kubeadm init)] ***
+changed: [k8s_master01]
+changed: [k8s_master02]
+changed: [k8s_master03]
+changed: [k8s_node01]
+changed: [k8s_node02]
+
+PLAY [部署 HAProxy + Keepalived - 仅 Master 节点] ******************************
+
+TASK [haproxy_keepalived : Install haproxy and keepalived] *********************
+ok: [k8s_master01] => (item=haproxy)
+ok: [k8s_master02] => (item=haproxy)
+ok: [k8s_master03] => (item=haproxy)
+ok: [k8s_master02] => (item=keepalived)
+ok: [k8s_master01] => (item=keepalived)
+ok: [k8s_master03] => (item=keepalived)
+
+TASK [haproxy_keepalived : Deploy keepalived health check script] **************
+changed: [k8s_master02]
+changed: [k8s_master01]
+changed: [k8s_master03]
+
+TASK [haproxy_keepalived : Configure haproxy] **********************************
+changed: [k8s_master02]
+changed: [k8s_master01]
+changed: [k8s_master03]
+
+TASK [haproxy_keepalived : Configure keepalived] *******************************
+changed: [k8s_master02]
+changed: [k8s_master01]
+changed: [k8s_master03]
+
+TASK [haproxy_keepalived : Start and enable services] **************************
+changed: [k8s_master02] => (item=haproxy)
+changed: [k8s_master01] => (item=haproxy)
+changed: [k8s_master03] => (item=haproxy)
+changed: [k8s_master02] => (item=keepalived)
+changed: [k8s_master01] => (item=keepalived)
+changed: [k8s_master03] => (item=keepalived)
+
+RUNNING HANDLER [haproxy_keepalived : restart haproxy] *************************
+changed: [k8s_master01]
+changed: [k8s_master02]
+changed: [k8s_master03]
+
+RUNNING HANDLER [haproxy_keepalived : restart keepalived] **********************
+changed: [k8s_master01]
+changed: [k8s_master02]
+changed: [k8s_master03]
+
+PLAY RECAP *********************************************************************
+k8s_master01               : ok=28   changed=15   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+k8s_master02               : ok=28   changed=15   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+k8s_master03               : ok=28   changed=15   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+k8s_node01                 : ok=21   changed=9    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+k8s_node02                 : ok=21   changed=9    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+[2026-06-23 23:58:54] INFO: === 阶段3: 集群初始化 ===
+[2026-06-23 23:58:54] INFO: 执行: 阶段3: 集群初始化
+
+PLAY [初始化第一个 Master 节点] ************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [k8s_master01]
+
+TASK [first-master : 获取已安装的 kubeadm 版本] ********************************
+ok: [k8s_master01]
+
+TASK [first-master : 设置 k8s_version 变量] ************************************
+ok: [k8s_master01]
+
+TASK [first-master : 生成 kubeadm 初始配置文件] ********************************
+ok: [k8s_master01]
+
+TASK [first-master : 转换 kubeadm 配置文件格式] ********************************
+changed: [k8s_master01]
+
+TASK [first-master : 取回转换后的配置文件到控制节点] ***************************
+ok: [k8s_master01]
+
+TASK [first-master : 分发 new.yaml 到所有 Master 节点] *************************
+ok: [k8s_master01]
+
+TASK [first-master : 所有 Master 节点提前拉取 Kubernetes 镜像] *****************
+changed: [k8s_master01]
+
+TASK [first-master : Master01 初始化 Kubernetes 集群] **************************
+changed: [k8s_master01]
+
+TASK [first-master : 配置 Master01 kubectl 访问环境] ***************************
+changed: [k8s_master01]
+
+TASK [first-master : 生成新的 kubeadm join token] ******************************
+changed: [k8s_master01]
+
+TASK [first-master : 设置 join_token 变量] *************************************
+ok: [k8s_master01]
+
+PLAY [其余 Master 和 Worker 节点加入集群] **************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [k8s_master03]
+ok: [k8s_master02]
+ok: [k8s_node02]
+ok: [k8s_node01]
+
+TASK [cluster-join : 获取 discovery-token-ca-cert-hash] ************************
+changed: [k8s_master01]
+
+TASK [cluster-join : 获取 certificate-key] *************************************
+changed: [k8s_master01]
+
+TASK [cluster-join : 其他 Master 节点加入控制平面] *****************************
+changed: [k8s_master03]
+changed: [k8s_master02]
+
+TASK [cluster-join : Worker 节点加入集群] **************************************
+changed: [k8s_node01]
+changed: [k8s_node02]
+
+PLAY [部署 CNI 网络插件（在第一个 Master 上执行）] *****************************
+
+TASK [network : Configure NetworkManager to ignore Calico interfaces] **********
+changed: [k8s_master01]
+
+TASK [network : Ensure k8s-ha-install repo is at correct branch] ***************
+changed: [k8s_master01]
+
+TASK [network : Get Pod CIDR from kube-controller-manager manifest] ************
+ok: [k8s_master01]
+
+TASK [network : Replace POD_CIDR placeholder in calico.yaml] *******************
+changed: [k8s_master01]
+
+TASK [network : Apply Calico manifests] ****************************************
+changed: [k8s_master01]
+
+TASK [network : Verify Calico pods status] *************************************
+ok: [k8s_master01]
+
+TASK [network : Verify nodes status] *******************************************
+ok: [k8s_master01]
+
+RUNNING HANDLER [network : Restart NetworkManager] *****************************
+changed: [k8s_master01]
+
+PLAY RECAP *********************************************************************
+k8s_master01               : ok=22   changed=12   unreachable=0    failed=0    skipped=5    rescued=0    ignored=0   
+k8s_master02               : ok=2    changed=1    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+k8s_master03               : ok=2    changed=1    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+k8s_node01                 : ok=2    changed=1    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+k8s_node02                 : ok=2    changed=1    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+
+[2026-06-24 00:01:01] INFO: 等待所有节点状态为 Ready...
+[2026-06-24 00:01:11] INFO: 检查节点状态...
+[2026-06-24 00:01:11] WARN: 节点未就绪: ['k8s-master01', 'k8s-master02', 'k8s-master03', 'k8s-node01', 'k8s-node02']
+[2026-06-24 00:01:21] INFO: 检查节点状态...
+[2026-06-24 00:01:22] WARN: 节点未就绪: ['k8s-master02', 'k8s-node01', 'k8s-node02']
+[2026-06-24 00:01:32] INFO: 检查节点状态...
+[2026-06-24 00:01:33] INFO: 所有节点均已就绪
+[2026-06-24 00:01:33] INFO: 验证 Calico 网络插件...
+[2026-06-24 00:01:33] INFO: 等待 Calico Pods 启动... (Running 0/5)
+[2026-06-24 00:01:44] INFO: 等待 Calico Pods 启动... (Running 1/5)
+[2026-06-24 00:01:54] INFO: Calico 验证通过: 4/5 节点运行中
+[2026-06-24 00:01:54] INFO:   已就绪节点: k8s-master03, k8s-master02, k8s-node02, k8s-master01
+[2026-06-24 00:01:54] WARN:   以下 Pod 异常: calico-node-hktc7(k8s-node01:Pending)
+[2026-06-24 00:01:54] INFO: Calico 已就绪，开始部署 Metrics Server...
+[2026-06-24 00:01:54] INFO: === Metrics Server 部署 ===
+[2026-06-24 00:01:54] INFO: 执行: Metrics Server 部署
+
+PLAY [部署 Metrics Server（在 Calico 网络就绪后执行）] *************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [k8s_master01]
+ok: [k8s_node02]
+ok: [k8s_master02]
+ok: [k8s_node01]
+ok: [k8s_master03]
+
+TASK [metrics : Read front-proxy-ca.crt from master01] *************************
+ok: [k8s_master01]
+
+TASK [metrics : Ensure Kubernetes PKI directory exists on nodes] ***************
+ok: [k8s_node02]
+ok: [k8s_node01]
+
+TASK [metrics : Copy certificate to workers] ***********************************
+changed: [k8s_node01]
+changed: [k8s_node02]
+
+TASK [metrics : Apply metrics server manifests] ********************************
+changed: [k8s_master01]
+
+TASK [metrics : Force restart metrics-server pods] *****************************
+changed: [k8s_master01]
+
+TASK [metrics : Verify front-proxy-ca.crt exists on worker] ********************
+ok: [k8s_node01]
+ok: [k8s_node02]
+
+TASK [metrics : Show cert status on workers] ***********************************
+ok: [k8s_node01] => {
+    "msg": "Worker k8s_node01: front-proxy-ca.crt OK (regular file)\n(size: 1123 bytes)"
+}
+ok: [k8s_node02] => {
+    "msg": "Worker k8s_node02: front-proxy-ca.crt OK (regular file)\n(size: 1123 bytes)"
+}
+
+PLAY RECAP *********************************************************************
+k8s_master01               : ok=4    changed=2    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0   
+k8s_master02               : ok=1    changed=0    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0   
+k8s_master03               : ok=1    changed=0    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0   
+k8s_node01                 : ok=5    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+k8s_node02                 : ok=5    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+[2026-06-24 00:02:03] INFO: 验证 Metrics Server 状态...
+[2026-06-24 00:02:03] INFO: 验证 Metrics Server...
+[2026-06-24 00:02:04] INFO: 等待 Metrics Server Pod 启动...
+[2026-06-24 00:02:14] INFO: Metrics Server 已正常运行
+[2026-06-24 00:02:14] INFO: === 阶段4: 集群验证 ===
+[2026-06-24 00:02:14] INFO: 执行: 阶段4: 集群验证
+
+PLAY [验证集群状态] ************************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [k8s_master01]
+
+TASK [等待所有节点就绪] ********************************************************
+changed: [k8s_master01]
+
+TASK [显示节点列表] ************************************************************
+changed: [k8s_master01]
+
+TASK [显示系统 Pod 状态] *******************************************************
+changed: [k8s_master01]
+
+TASK [打印节点信息] ************************************************************
+ok: [k8s_master01] => {
+    "msg": [
+        "节点列表输出：",
+        [
+            "NAME           STATUS   ROLES           AGE     VERSION    INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                      KERNEL-VERSION                 CONTAINER-RUNTIME",
+            "k8s-master01   Ready    control-plane   2m24s   v1.31.14   10.0.1.31     <none>        Rocky Linux 9.8 (Blue Onyx)   5.14.0-687.15.1.el9_8.x86_64   containerd://2.2.5",
+            "k8s-master02   Ready    control-plane   96s     v1.31.14   10.0.1.32     <none>        Rocky Linux 9.8 (Blue Onyx)   5.14.0-687.15.1.el9_8.x86_64   containerd://2.2.5",
+            "k8s-master03   Ready    control-plane   99s     v1.31.14   10.0.1.33     <none>        Rocky Linux 9.8 (Blue Onyx)   5.14.0-687.15.1.el9_8.x86_64   containerd://2.2.5",
+            "k8s-node01     Ready    <none>          89s     v1.31.14   10.0.1.41     <none>        Rocky Linux 9.8 (Blue Onyx)   5.14.0-687.15.1.el9_8.x86_64   containerd://2.2.5",
+            "k8s-node02     Ready    <none>          88s     v1.31.14   10.0.1.42     <none>        Rocky Linux 9.8 (Blue Onyx)   5.14.0-687.15.1.el9_8.x86_64   containerd://2.2.5"
+        ]
+    ]
+}
+
+TASK [打印 Pod 信息（可选）] ***************************************************
+ok: [k8s_master01] => {
+    "msg": [
+        "集群 Pod 列表：",
+        [
+            "NAMESPACE     NAME                                       READY   STATUS    RESTARTS   AGE",
+            "kube-system   calico-kube-controllers-7d67d4b9c7-z6g2c   1/1     Running   0          81s",
+            "kube-system   calico-node-5sts7                          1/1     Running   0          81s",
+            "kube-system   calico-node-c2m64                          1/1     Running   0          81s",
+            "kube-system   calico-node-hktc7                          1/1     Running   0          81s",
+            "kube-system   calico-node-kjqjz                          1/1     Running   0          81s",
+            "kube-system   calico-node-w5rbh                          1/1     Running   0          81s",
+            "kube-system   coredns-fcd6c9c4-gr4gt                     1/1     Running   0          2m23s",
+            "kube-system   coredns-fcd6c9c4-kfdd6                     1/1     Running   0          2m23s",
+            "kube-system   etcd-k8s-master01                          1/1     Running   0          2m23s",
+            "kube-system   etcd-k8s-master02                          1/1     Running   0          92s",
+            "kube-system   etcd-k8s-master03                          1/1     Running   0          99s",
+            "kube-system   kube-apiserver-k8s-master01                1/1     Running   0          2m23s",
+            "kube-system   kube-apiserver-k8s-master02                1/1     Running   0          96s",
+            "kube-system   kube-apiserver-k8s-master03                1/1     Running   0          99s",
+            "kube-system   kube-controller-manager-k8s-master01       1/1     Running   0          2m24s",
+            "kube-system   kube-controller-manager-k8s-master02       1/1     Running   0          96s",
+            "kube-system   kube-controller-manager-k8s-master03       1/1     Running   0          99s",
+            "kube-system   kube-proxy-772gn                           1/1     Running   0          89s",
+            "kube-system   kube-proxy-8c4rv                           1/1     Running   0          96s",
+            "kube-system   kube-proxy-bk7s5                           1/1     Running   0          88s",
+            "kube-system   kube-proxy-drzd4                           1/1     Running   0          2m23s",
+            "kube-system   kube-proxy-gmpw9                           1/1     Running   0          99s",
+            "kube-system   kube-scheduler-k8s-master01                1/1     Running   0          2m23s",
+            "kube-system   kube-scheduler-k8s-master02                1/1     Running   0          96s",
+            "kube-system   kube-scheduler-k8s-master03                1/1     Running   0          99s",
+            "kube-system   metrics-server-747fc7dd84-xnh57            0/1     Running   0          16s",
+            "kube-system   metrics-server-7f9b8dc8fb-wfnd9            0/1     Running   0          16s"
+        ]
+    ]
+}
+
+PLAY RECAP *********************************************************************
+k8s_master01               : ok=6    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+[2026-06-24 00:02:19] INFO: === 开始集群全面验证 ===
+[2026-06-24 00:02:19] INFO:   节点状态验证: [0;32mPASS[0m
+[2026-06-24 00:02:20] INFO:   控制平面组件验证: [0;32mPASS[0m
+[2026-06-24 00:02:21] INFO:   集群健康状态验证: [0;32mPASS[0m
+[2026-06-24 00:02:22] INFO:   网络插件验证: [0;32mPASS[0m
+[2026-06-24 00:02:23] INFO:   证书与安全验证: [0;32mPASS[0m
+[2026-06-24 00:02:23] INFO: === 生成部署报告 ===
+[2026-06-24 00:02:24] INFO: 部署报告已保存: /root/ansible-k8s-bak/logs/deploy_report_20260624_000223.txt
+[2026-06-24 00:02:24] INFO: JSON 报告已保存: /root/ansible-k8s-bak/logs/deploy_report_20260624_000223.json
+[2026-06-24 00:02:24] INFO: ==========================================
+[2026-06-24 00:02:24] INFO:   Kubernetes 集群部署完成 ✓
+[2026-06-24 00:02:24] INFO:   时间: 2026-06-24 00:02:24
+[2026-06-24 00:02:24] INFO:   日志: /root/ansible-k8s-bak/logs/deploy_20260623_235534.log
+[2026-06-24 00:02:24] INFO: ==========================================

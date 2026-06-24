@@ -1,0 +1,5 @@
+---
+- name: 部署 Metrics Server（在 Calico 网络就绪后执行）
+  hosts: k8s_cluster
+  roles:
+    - metrics
