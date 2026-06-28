@@ -18,10 +18,13 @@ git clone https://github.com/chen-k8s/ansible-k8s.git
 ### 进入目录
 cd ansible-k8s
 
-需根据实际情况修改inventory.ini主机清单，修改tools/ssh_login.yaml文件实现免密登录目标主机。
-### 执行 Ansible 剧本实现免密登录
+注：需根据实际情况修改inventory.ini主机清单
+### 执行 Ansible 剧本进行免密登录
+
+正式环境可能不需要，如果已经能够免密登录到目标主机，此操作不用执行；反之可以通过修改tools/ssh_login.yaml文件，执行以下剧本实现免密登录目标主机。
+
 ansible-playbook -i inventory.ini tools/ssh_login.yaml
 ### 执行Python脚本
 ./start.py
 ### 备注
-本项目供学习交流使用，经本人测试已经可以正常交付，无报错；如果安装集群过程中还出现问题，可运行ansible-playbook -i inventory.ini tools/cleanup-k8s.yml清理集群。
+本项目供学习交流使用，经本人测试已经可以正常搭建集群，无报错；如果安装集群过程中还出现问题，可运行ansible-playbook -i inventory.ini tools/cleanup-k8s.yml清理集群（但不会清理基础软件和基础配置）。
